@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: it-management-system
+    env: node
+    buildCommand: npm install && npm run init-db
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true

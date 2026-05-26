@@ -1,0 +1,6 @@
+node_modules/
+helpdesk.db
+*.db-journal
+.env
+.DS_Store
+Thumbs.db

@@ -1,0 +1,125 @@
+<%- include('partials/header', { nav: 'notifications' }) %>
+
+<%
+function eventColor(type) {
+    const map = {
+        'TICKET_CREATED':  ['bg-primary-light',   'text-primary',         'border-primary',   'add_circle'],
+        'TICKET_ASSIGNED': ['bg-secondary-light', 'text-secondary',       'border-secondary', 'assignment_ind'],
+        'STATUS_CHANGED':  ['bg-yellow-100',      'text-yellow-700',      'border-yellow-500','sync'],
+        'TICKET_CLOSED':   ['bg-status-closed-bg','text-status-closed-text','border-emerald-500','check_circle'],
+    };
+    return map[type] || ['bg-gray-100','text-gray-700','border-gray-400','notifications'];
+}
+
+const counts = { all: notifs.length };
+notifs.forEach(n => { counts[n.trigger_type] = (counts[n.trigger_type] || 0) + 1; });
+const unread = notifs.filter(n => !n.is_read);
+const read = notifs.filter(n => n.is_read);
+%>
+
+<div class="mb-6 flex items-start justify-between">
+    <div>
+        <h1 class="text-3xl font-bold">System Events</h1>
+        <p class="text-sm text-on-surface-var mt-1">Real-time audit log and notifications across the ITSM ecosystem.</p>
+    </div>
+    <div class="flex gap-2">
+        <button class="border border-outline-var hover:bg-surface-low text-on-surface text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-base">filter_list</span>
+            Filter
+        </button>
+        <button class="bg-primary hover:bg-primary-dark text-white text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-base">done_all</span>
+            Mark all read
+        </button>
+    </div>
+</div>
+
+<div class="grid grid-cols-4 gap-6">
+    <!-- Categories sidebar -->
+    <aside class="space-y-4">
+        <div class="bg-surface-card border border-outline-var rounded-lg p-5">
+            <div class="text-[11px] uppercase tracking-wider text-on-surface-var font-semibold mb-3">Categories</div>
+            <ul class="space-y-1">
+                <li class="flex items-center justify-between px-3 py-2 bg-primary-light text-primary rounded text-sm font-semibold">
+                    <span class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base">inbox</span>
+                        All Events
+                    </span>
+                    <span class="text-xs"><%= counts.all || 0 %></span>
+                </li>
+                <% ['TICKET_CREATED', 'TICKET_ASSIGNED', 'STATUS_CHANGED', 'TICKET_CLOSED'].forEach(type => {
+                    const [, , , icon] = eventColor(type);
+                    const count = counts[type] || 0;
+                %>
+                <li class="flex items-center justify-between px-3 py-2 hover:bg-surface-low rounded text-sm">
+                    <span class="flex items-center gap-2 text-on-surface-var">
+                        <span class="material-symbols-outlined text-base"><%= icon %></span>
+                        <%= type.replace('_', ' ') %>
+                    </span>
+                    <span class="text-xs text-on-surface-var"><%= count %></span>
+                </li>
+                <% }) %>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Notifications list -->
+    <div class="col-span-3 space-y-4">
+        <% if (notifs.length === 0) { %>
+            <div class="bg-surface-card border border-outline-var rounded-lg p-12 text-center">
+                <span class="material-symbols-outlined text-5xl text-outline-var">notifications_off</span>
+                <p class="text-on-surface-var mt-3">No notifications yet.</p>
+            </div>
+        <% } else { %>
+
+        <% if (unread.length > 0) { %>
+        <div>
+            <div class="text-[11px] uppercase tracking-wider text-on-surface-var font-semibold mb-2">Unread</div>
+            <div class="space-y-2">
+            <% unread.forEach(n => {
+                const [bg, txt, border, icon] = eventColor(n.trigger_type);
+            %>
+                <div class="bg-surface-card border border-outline-var border-l-4 <%= border %> rounded p-4 flex items-start gap-4">
+                    <div class="w-10 h-10 rounded <%= bg %> <%= txt %> flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined"><%= icon %></span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] uppercase tracking-wider font-semibold <%= txt %>"><%= n.trigger_type %></div>
+                        <div class="font-semibold text-sm mt-0.5"><%= n.title %></div>
+                        <div class="text-sm text-on-surface-var mt-1"><%= n.content %></div>
+                    </div>
+                    <span class="text-xs text-on-surface-var font-mono flex-shrink-0"><%= n.sent_at %></span>
+                </div>
+            <% }) %>
+            </div>
+        </div>
+        <% } %>
+
+        <% if (read.length > 0) { %>
+        <div>
+            <div class="text-[11px] uppercase tracking-wider text-on-surface-var font-semibold mb-2 mt-4">Earlier</div>
+            <div class="space-y-2">
+            <% read.forEach(n => {
+                const [bg, txt, border, icon] = eventColor(n.trigger_type);
+            %>
+                <div class="bg-surface-card border border-outline-var rounded p-4 flex items-start gap-4 opacity-75">
+                    <div class="w-10 h-10 rounded bg-surface-low text-on-surface-var flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined"><%= icon %></span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] uppercase tracking-wider font-semibold text-on-surface-var"><%= n.trigger_type %></div>
+                        <div class="font-semibold text-sm mt-0.5"><%= n.title %></div>
+                        <div class="text-sm text-on-surface-var mt-1"><%= n.content %></div>
+                    </div>
+                    <span class="text-xs text-on-surface-var font-mono flex-shrink-0"><%= n.sent_at %></span>
+                </div>
+            <% }) %>
+            </div>
+        </div>
+        <% } %>
+
+        <% } %>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,227 @@
+<% nav = 'dashboard' %>
+<%- include('partials/header', { nav: 'dashboard' }) %>
+
+<% function statusChip(s) {
+    const map = {
+        'OPEN':         ['bg-status-open-bg',   'text-status-open-text',   'Open'],
+        'IN_PROGRESS':  ['bg-status-prog-bg',   'text-status-prog-text',   'In Progress'],
+        'PENDING_USER': ['bg-status-pend-bg',   'text-status-pend-text',   'Pending'],
+        'CLOSED':       ['bg-status-closed-bg', 'text-status-closed-text', 'Closed'],
+    };
+    return map[s] || ['bg-gray-200', 'text-gray-700', s];
+} %>
+<% function priorityChip(p) {
+    const map = {
+        'LOW':      ['expand_more', 'text-on-surface-var', 'Low'],
+        'MEDIUM':   ['remove',      'text-on-surface-var', 'Medium'],
+        'HIGH':     ['priority_high','text-error',         'High'],
+        'CRITICAL': ['warning',     'text-error',          'Critical'],
+    };
+    return map[p] || ['help', 'text-on-surface-var', p];
+} %>
+
+<%
+let openCount = 0, inProgressCount = 0, pendingCount = 0, closedCount = 0;
+let highPriorityCount = 0;
+tickets.forEach(t => {
+    if (t.currentStatus === 'OPEN') openCount++;
+    else if (t.currentStatus === 'IN_PROGRESS') inProgressCount++;
+    else if (t.currentStatus === 'PENDING_USER') pendingCount++;
+    else if (t.currentStatus === 'CLOSED') closedCount++;
+    if (t.priority === 'HIGH' || t.priority === 'CRITICAL') highPriorityCount++;
+});
+const activeTickets = openCount + inProgressCount + pendingCount;
+%>
+
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-on-surface">
+        Welcome back, <%= currentUser.name.split(' ')[0] %>
+        <span class="text-primary text-2xl font-semibold">(<%= currentUser.role.replace('_', ' ') %>)</span>
+    </h1>
+    <p class="text-sm text-on-surface-var mt-1">
+        <% if (activeTickets > 0) { %>
+            You have <span class="text-primary font-semibold"><%= activeTickets %></span> active ticket<%= activeTickets === 1 ? '' : 's' %><% if (highPriorityCount > 0) { %>, <span class="text-error font-semibold"><%= highPriorityCount %></span> high priority<% } %>.
+        <% } else { %>
+            No active tickets right now.
+        <% } %>
+    </p>
+</div>
+
+<!-- KPI cards -->
+<div class="grid grid-cols-4 gap-4 mb-8">
+    <div class="bg-surface-card border border-outline-var rounded-lg p-5">
+        <div class="flex items-start justify-between mb-3">
+            <span class="material-symbols-outlined text-primary text-2xl">confirmation_number</span>
+            <span class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-var">Active</span>
+        </div>
+        <div class="text-xs uppercase tracking-wider text-on-surface-var">Open Tickets</div>
+        <div class="text-4xl font-bold mt-1"><%= activeTickets %></div>
+    </div>
+    <div class="bg-surface-card border border-outline-var rounded-lg p-5">
+        <div class="flex items-start justify-between mb-3">
+            <span class="material-symbols-outlined text-error text-2xl">priority_high</span>
+            <span class="text-[10px] font-semibold uppercase tracking-wider text-error">Urgent</span>
+        </div>
+        <div class="text-xs uppercase tracking-wider text-on-surface-var">High Priority</div>
+        <div class="text-4xl font-bold mt-1"><%= highPriorityCount %></div>
+    </div>
+    <div class="bg-surface-card border border-outline-var rounded-lg p-5">
+        <div class="flex items-start justify-between mb-3">
+            <span class="material-symbols-outlined text-yellow-700 text-2xl">schedule</span>
+            <span class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-var">Waiting</span>
+        </div>
+        <div class="text-xs uppercase tracking-wider text-on-surface-var">Pending User</div>
+        <div class="text-4xl font-bold mt-1"><%= pendingCount %></div>
+    </div>
+    <div class="bg-surface-card border border-outline-var rounded-lg p-5">
+        <div class="flex items-start justify-between mb-3">
+            <span class="material-symbols-outlined text-emerald-700 text-2xl">check_circle</span>
+            <span class="text-[10px] font-semibold uppercase tracking-wider text-emerald-700">Resolved</span>
+        </div>
+        <div class="text-xs uppercase tracking-wider text-on-surface-var">Closed</div>
+        <div class="text-4xl font-bold mt-1"><%= closedCount %></div>
+    </div>
+</div>
+
+<!-- Filter bar (FR-13) -->
+<form method="get" action="/" class="bg-surface-card border border-outline-var rounded-lg p-4 mb-6">
+    <div class="flex items-end gap-3 flex-wrap">
+        <div class="flex-1 min-w-[180px]">
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-on-surface-var mb-1">Search</label>
+            <input type="text" name="q" value="<%= filters.q %>" placeholder="Title or description…"
+                   class="w-full border border-outline-var rounded px-3 py-2 text-sm bg-surface">
+        </div>
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-on-surface-var mb-1">Status</label>
+            <select name="status" class="border border-outline-var rounded px-3 py-2 text-sm bg-surface">
+                <option value="">All</option>
+                <% statusOptions.forEach(s => { %>
+                    <option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= s.replace('_',' ') %></option>
+                <% }) %>
+            </select>
+        </div>
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-on-surface-var mb-1">Priority</label>
+            <select name="priority" class="border border-outline-var rounded px-3 py-2 text-sm bg-surface">
+                <option value="">All</option>
+                <% priorityOptions.forEach(p => { %>
+                    <option value="<%= p %>" <%= filters.priority === p ? 'selected' : '' %>><%= p.charAt(0) + p.slice(1).toLowerCase() %></option>
+                <% }) %>
+            </select>
+        </div>
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-on-surface-var mb-1">Category</label>
+            <select name="category" class="border border-outline-var rounded px-3 py-2 text-sm bg-surface">
+                <option value="">All</option>
+                <% categoryOptions.forEach(c => { %>
+                    <option value="<%= c %>" <%= filters.category === c ? 'selected' : '' %>><%= c.charAt(0) + c.slice(1).toLowerCase() %></option>
+                <% }) %>
+            </select>
+        </div>
+        <% if (currentUser.role === 'IT_MANAGER' && agents.length) { %>
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-on-surface-var mb-1">Agent</label>
+            <select name="agentUserId" class="border border-outline-var rounded px-3 py-2 text-sm bg-surface">
+                <option value="">All</option>
+                <% agents.forEach(a => { %>
+                    <option value="<%= a.id %>" <%= String(filters.agentUserId) === String(a.id) ? 'selected' : '' %>><%= a.name %></option>
+                <% }) %>
+            </select>
+        </div>
+        <% } %>
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-on-surface-var mb-1">From</label>
+            <input type="date" name="dateFrom" value="<%= filters.dateFrom %>"
+                   class="border border-outline-var rounded px-3 py-2 text-sm bg-surface">
+        </div>
+        <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-on-surface-var mb-1">To</label>
+            <input type="date" name="dateTo" value="<%= filters.dateTo %>"
+                   class="border border-outline-var rounded px-3 py-2 text-sm bg-surface">
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="submit"
+                    class="bg-primary hover:bg-primary-dark text-white text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base">filter_alt</span> Filter
+            </button>
+            <% if (hasFilters) { %>
+                <a href="/" class="text-xs text-on-surface-var hover:text-primary underline">Clear</a>
+            <% } %>
+        </div>
+    </div>
+</form>
+
+<!-- Tickets table -->
+<div class="bg-surface-card border border-outline-var rounded-lg overflow-hidden">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-outline-var">
+        <h2 class="text-lg font-semibold">
+            <% if (currentUser.role === 'END_USER') { %>My Tickets<% } else if (currentUser.role === 'SUPPORT_AGENT') { %>Assigned & Queue<% } else { %>System Tickets<% } %>
+        </h2>
+        <% if (currentUser.role === 'END_USER' || currentUser.role === 'IT_MANAGER') { %>
+        <a href="/tickets/new"
+           class="bg-primary hover:bg-primary-dark text-white text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-base">add</span>
+            New Ticket
+        </a>
+        <% } %>
+    </div>
+
+    <% if (tickets.length === 0) { %>
+        <div class="p-12 text-center">
+            <span class="material-symbols-outlined text-5xl text-outline-var">inbox</span>
+            <p class="text-on-surface-var mt-3">No tickets to display.</p>
+            <% if (currentUser.role === 'END_USER') { %>
+                <a href="/tickets/new" class="inline-flex items-center gap-1.5 mt-4 bg-primary hover:bg-primary-dark text-white text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded">
+                    <span class="material-symbols-outlined text-base">add</span> Submit your first ticket
+                </a>
+            <% } %>
+        </div>
+    <% } else { %>
+    <table class="w-full text-sm">
+        <thead class="bg-surface-low">
+            <tr class="text-left text-[11px] font-semibold uppercase tracking-wider text-on-surface-var">
+                <th class="px-6 py-3">ID</th>
+                <th class="px-6 py-3">Title</th>
+                <th class="px-6 py-3">Status</th>
+                <th class="px-6 py-3">Priority</th>
+                <th class="px-6 py-3">Category</th>
+                <th class="px-6 py-3">Created</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-var">
+        <% tickets.forEach(t => {
+            const [bg, txt, lbl] = statusChip(t.currentStatus);
+            const [picon, pcolor, plbl] = priorityChip(t.priority);
+        %>
+            <tr class="hover:bg-surface-low transition">
+                <td class="px-6 py-4">
+                    <a href="/tickets/<%= t.id %>" class="text-primary font-mono text-xs font-semibold">TKT-<%= String(t.id).padStart(4, '0') %></a>
+                </td>
+                <td class="px-6 py-4">
+                    <a href="/tickets/<%= t.id %>" class="font-medium hover:text-primary"><%= t.title %></a>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium <%= bg %> <%= txt %>">
+                        <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                        <%= lbl %>
+                    </span>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="inline-flex items-center gap-1 text-sm <%= pcolor %>">
+                        <span class="material-symbols-outlined text-base"><%= picon %></span>
+                        <%= plbl %>
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-on-surface-var"><%= t.category.charAt(0) + t.category.slice(1).toLowerCase() %></td>
+                <td class="px-6 py-4 text-on-surface-var font-mono text-xs"><%= t.createdAt %></td>
+            </tr>
+        <% }) %>
+        </tbody>
+    </table>
+    <div class="px-6 py-3 text-xs text-on-surface-var border-t border-outline-var">
+        Showing <%= tickets.length %> ticket<%= tickets.length === 1 ? '' : 's' %>
+    </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>

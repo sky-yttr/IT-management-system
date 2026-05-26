@@ -1,0 +1,166 @@
+<%- include('partials/header', { nav: 'users' }) %>
+
+<%
+function roleChip(r) {
+    const map = {
+        'END_USER':      ['bg-status-open-bg',  'text-status-open-text',  'End User'],
+        'SUPPORT_AGENT': ['bg-secondary-light', 'text-secondary',         'Support Agent'],
+        'IT_MANAGER':    ['bg-primary-light',   'text-primary',           'IT Manager'],
+    };
+    return map[r] || ['bg-gray-200', 'text-gray-700', r];
+}
+function initials(name) {
+    return name.split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+}
+const totalUsers = users.length;
+const activeUsers = users.filter(u => u.is_active).length;
+const agentCount = users.filter(u => u.role === 'SUPPORT_AGENT').length;
+%>
+
+<div class="mb-6">
+    <h1 class="text-3xl font-bold">User Administration</h1>
+    <p class="text-sm text-on-surface-var mt-1">Manage organization access, roles, and security permissions.</p>
+</div>
+
+<div class="grid grid-cols-3 gap-6 mb-6">
+    <!-- Create user (col-span 2) -->
+    <div class="col-span-2 bg-surface-card border border-outline-var rounded-lg p-6">
+        <div class="flex items-center gap-2 mb-5">
+            <span class="material-symbols-outlined text-primary">person_add</span>
+            <h2 class="text-lg font-semibold">Create New User</h2>
+        </div>
+
+        <% if (error) { %>
+        <div class="mb-4 p-3 bg-error-light border border-error/30 text-error text-sm rounded flex items-start gap-2">
+            <span class="material-symbols-outlined text-base">error</span>
+            <span><%= error %></span>
+        </div>
+        <% } %>
+
+        <form method="post" action="/users" class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="text-xs font-semibold text-on-surface-var">Full Name</label>
+                <input type="text" name="name" required placeholder="e.g. Elena Rodriguez"
+                       class="mt-1 w-full px-3 py-2 border border-outline-var rounded text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+            </div>
+            <div>
+                <label class="text-xs font-semibold text-on-surface-var">Email Address</label>
+                <input type="email" name="email" required placeholder="elena.r@company.com"
+                       class="mt-1 w-full px-3 py-2 border border-outline-var rounded text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+            </div>
+            <div>
+                <label class="text-xs font-semibold text-on-surface-var">Password (min 6)</label>
+                <input type="password" name="password" required minlength="6"
+                       class="mt-1 w-full px-3 py-2 border border-outline-var rounded text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+            </div>
+            <div>
+                <label class="text-xs font-semibold text-on-surface-var">System Role</label>
+                <select name="role" required
+                        class="mt-1 w-full px-3 py-2 border border-outline-var rounded text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                    <option value="END_USER">End User</option>
+                    <option value="SUPPORT_AGENT">Support Agent</option>
+                    <option value="IT_MANAGER">IT Manager</option>
+                </select>
+            </div>
+            <div class="col-span-2 flex justify-end pt-2">
+                <button type="submit"
+                        class="bg-primary hover:bg-primary-dark text-white text-xs font-semibold uppercase tracking-wider px-5 py-2.5 rounded flex items-center gap-1.5">
+                    Provision Access
+                    <span class="material-symbols-outlined text-base">arrow_forward</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Stats column -->
+    <div class="space-y-4">
+        <div class="bg-primary text-white rounded-lg p-5">
+            <div class="text-xs uppercase tracking-wider opacity-80">Total Managed Users</div>
+            <div class="text-4xl font-bold mt-2"><%= totalUsers %></div>
+            <div class="text-xs mt-3 flex items-center gap-1 opacity-90">
+                <span class="material-symbols-outlined text-sm">trending_up</span>
+                <%= activeUsers %> active
+            </div>
+        </div>
+        <div class="bg-surface-card border border-outline-var rounded-lg p-5">
+            <div class="text-xs uppercase tracking-wider text-on-surface-var font-semibold mb-3">System Health</div>
+            <div class="flex items-center justify-between text-sm">
+                <span>Active Sessions</span>
+                <span class="font-bold"><%= activeUsers %></span>
+            </div>
+            <div class="mt-2 h-2 bg-surface-low rounded-full overflow-hidden">
+                <div class="h-full bg-primary" style="width: <%= Math.round(activeUsers / Math.max(totalUsers, 1) * 100) %>%"></div>
+            </div>
+            <div class="flex items-center justify-between text-sm mt-4">
+                <span>Support Agents</span>
+                <span class="font-bold"><%= agentCount %></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User directory -->
+<div class="bg-surface-card border border-outline-var rounded-lg overflow-hidden">
+    <div class="px-6 py-4 border-b border-outline-var">
+        <h2 class="text-lg font-semibold">User Directory</h2>
+    </div>
+    <table class="w-full text-sm">
+        <thead class="bg-surface-low">
+            <tr class="text-left text-[11px] font-semibold uppercase tracking-wider text-on-surface-var">
+                <th class="px-6 py-3">User</th>
+                <th class="px-6 py-3">Role</th>
+                <th class="px-6 py-3">Status</th>
+                <th class="px-6 py-3">Created</th>
+                <th class="px-6 py-3 text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-var">
+        <% users.forEach(u => {
+            const [rbg, rtxt, rlbl] = roleChip(u.role);
+        %>
+            <tr class="<%= u.is_active ? 'hover:bg-surface-low' : 'opacity-50' %>">
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded <%= u.is_active ? 'bg-primary-light text-primary' : 'bg-surface-low text-on-surface-var' %> flex items-center justify-center text-xs font-bold"><%= initials(u.name) %></div>
+                        <div>
+                            <div class="font-semibold"><%= u.name %></div>
+                            <div class="text-xs text-on-surface-var font-mono"><%= u.email %></div>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="inline-flex px-2.5 py-1 rounded text-xs font-medium <%= rbg %> <%= rtxt %>"><%= rlbl %></span>
+                </td>
+                <td class="px-6 py-4">
+                    <% if (u.is_active) { %>
+                        <span class="flex items-center gap-1.5 text-sm text-emerald-700">
+                            <span class="material-symbols-outlined text-base">check_circle</span> Active
+                        </span>
+                    <% } else { %>
+                        <span class="flex items-center gap-1.5 text-sm text-on-surface-var">
+                            <span class="material-symbols-outlined text-base">cancel</span> Inactive
+                        </span>
+                    <% } %>
+                </td>
+                <td class="px-6 py-4 text-on-surface-var font-mono text-xs"><%= u.created_at %></td>
+                <td class="px-6 py-4 text-right">
+                    <% if (u.is_active && u.id !== currentUser.id) { %>
+                        <form method="post" action="/users/<%= u.id %>/deactivate" class="inline">
+                            <button type="submit"
+                                    onclick="return confirm('Deactivate <%= u.name %>?')"
+                                    class="text-error text-xs font-semibold uppercase tracking-wider hover:underline">
+                                Deactivate
+                            </button>
+                        </form>
+                    <% } %>
+                </td>
+            </tr>
+        <% }) %>
+        </tbody>
+    </table>
+    <div class="px-6 py-3 text-xs text-on-surface-var border-t border-outline-var">
+        Showing <%= users.length %> user<%= users.length === 1 ? '' : 's' %>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

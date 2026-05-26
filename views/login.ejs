@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in · ITSM Pro</title>
+<link rel="stylesheet" href="/css/tailwind.css">
+<link rel="stylesheet" href="/css/icons.css">
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+
+<header class="bg-surface border-b border-outline-var">
+    <div class="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-2 text-primary font-bold text-lg">
+            <span class="material-symbols-outlined text-primary text-2xl">shield</span>
+            ITSM Pro
+        </div>
+        <span class="text-xs text-on-surface-var font-mono">v1.0.0-prototype</span>
+    </div>
+</header>
+
+<main class="flex-1 flex items-center justify-center px-6 py-12">
+    <div class="w-full max-w-md space-y-6">
+
+        <div class="bg-surface-card border border-outline-var rounded-lg p-8">
+            <h1 class="text-2xl font-bold text-on-surface">Sign In</h1>
+            <p class="text-sm text-on-surface-var mt-1">Enter your credentials to access the console.</p>
+
+            <% if (error) { %>
+            <div class="mt-5 p-3 bg-error-light border border-error/30 text-error text-sm rounded flex items-start gap-2">
+                <span class="material-symbols-outlined text-base">error</span>
+                <span><%= error %></span>
+            </div>
+            <% } %>
+
+            <form method="post" action="/login" class="mt-6 space-y-4">
+                <div>
+                    <label class="text-xs font-semibold uppercase tracking-wider text-on-surface-var">Email Address</label>
+                    <div class="mt-1.5 relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-var text-lg">mail</span>
+                        <input type="email" name="email" required autofocus
+                               placeholder="name@company.com"
+                               class="w-full pl-10 pr-3 py-2.5 border border-outline-var rounded text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold uppercase tracking-wider text-on-surface-var">Password</label>
+                    <div class="mt-1.5 relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-var text-lg">lock</span>
+                        <input type="password" name="password" required
+                               class="w-full pl-10 pr-3 py-2.5 border border-outline-var rounded text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                    </div>
+                </div>
+                <button type="submit"
+                        class="w-full bg-primary hover:bg-primary-dark text-white text-sm font-semibold uppercase tracking-wider py-3 rounded flex items-center justify-center gap-2 transition">
+                    Sign In
+                    <span class="material-symbols-outlined text-base">login</span>
+                </button>
+            </form>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="flex-1 h-px bg-outline-var"></div>
+            <span class="text-[10px] font-semibold uppercase tracking-widest text-on-surface-var">Demo Prototyping</span>
+            <div class="flex-1 h-px bg-outline-var"></div>
+        </div>
+
+        <div class="space-y-2">
+            <button type="button"
+                    onclick="fill('khady@helpdesk.local')"
+                    class="w-full text-left bg-surface-card border border-outline-var rounded p-3 hover:border-primary transition flex items-center gap-3">
+                <div class="w-9 h-9 rounded bg-primary-light flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-xl">admin_panel_settings</span>
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-semibold">IT Manager</div>
+                    <div class="text-xs text-on-surface-var font-mono">khady@helpdesk.local</div>
+                </div>
+                <span class="material-symbols-outlined text-outline">arrow_forward</span>
+            </button>
+
+            <button type="button"
+                    onclick="fill('alex@helpdesk.local')"
+                    class="w-full text-left bg-surface-card border border-outline-var rounded p-3 hover:border-primary transition flex items-center gap-3">
+                <div class="w-9 h-9 rounded bg-secondary-light flex items-center justify-center">
+                    <span class="material-symbols-outlined text-xl text-secondary">support_agent</span>
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-semibold">Support Agent</div>
+                    <div class="text-xs text-on-surface-var font-mono">alex@helpdesk.local</div>
+                </div>
+                <span class="material-symbols-outlined text-outline">arrow_forward</span>
+            </button>
+
+            <button type="button"
+                    onclick="fill('bineta@company.com')"
+                    class="w-full text-left bg-surface-card border border-outline-var rounded p-3 hover:border-primary transition flex items-center gap-3">
+                <div class="w-9 h-9 rounded bg-status-open-bg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-xl text-status-open-text">person</span>
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-semibold">End User</div>
+                    <div class="text-xs text-on-surface-var font-mono">bineta@company.com</div>
+                </div>
+                <span class="material-symbols-outlined text-outline">arrow_forward</span>
+            </button>
+            <p class="text-[11px] text-center text-on-surface-var pt-1">All demo accounts use password: <code class="bg-on-surface text-white px-1.5 py-0.5 rounded font-mono text-[10px]">password123</code></p>
+        </div>
+    </div>
+</main>
+
+<footer class="border-t border-outline-var bg-surface">
+    <div class="max-w-[1400px] mx-auto px-6 py-4 text-xs text-on-surface-var text-center">
+        © 2026 ITSM Pro · Prototype by Khady Yattara
+    </div>
+</footer>
+
+<script>
+function fill(email) {
+    document.querySelector('input[name=email]').value = email;
+    document.querySelector('input[name=password]').value = 'password123';
+}
+</script>
+</body>
+</html>

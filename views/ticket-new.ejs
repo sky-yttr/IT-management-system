@@ -1,0 +1,83 @@
+<%- include('partials/header', { nav: 'new' }) %>
+
+<div class="max-w-3xl mx-auto">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold">Submit a Ticket</h1>
+        <p class="text-sm text-on-surface-var mt-1">Report a technical issue or request assistance from the IT team.</p>
+    </div>
+
+    <% if (error) { %>
+    <div class="mb-4 p-3 bg-error-light border border-error/30 text-error text-sm rounded flex items-start gap-2">
+        <span class="material-symbols-outlined text-base">error</span>
+        <span><%= error %></span>
+    </div>
+    <% } %>
+
+    <form method="post" action="/tickets/new" class="bg-surface-card border border-outline-var rounded-lg p-8 space-y-6">
+        <div>
+            <label class="text-xs font-semibold uppercase tracking-wider text-on-surface-var">
+                Title <span class="text-error">*</span>
+            </label>
+            <input type="text" name="title" required maxlength="200"
+                   placeholder="Brief summary of the issue"
+                   class="mt-1.5 w-full px-3 py-2.5 border border-outline-var rounded text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="text-xs font-semibold uppercase tracking-wider text-on-surface-var">
+                    Category <span class="text-error">*</span>
+                </label>
+                <select name="category" required
+                        class="mt-1.5 w-full px-3 py-2.5 border border-outline-var rounded text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                    <option value="">Select category</option>
+                    <option value="HARDWARE">Hardware</option>
+                    <option value="SOFTWARE">Software</option>
+                    <option value="NETWORK">Network</option>
+                    <option value="ACCOUNT">Account</option>
+                    <option value="OTHER">Other</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs font-semibold uppercase tracking-wider text-on-surface-var">
+                    Priority <span class="text-error">*</span>
+                </label>
+                <select name="priority" required
+                        class="mt-1.5 w-full px-3 py-2.5 border border-outline-var rounded text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                    <option value="">Select priority</option>
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                    <option value="CRITICAL">Critical</option>
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label class="text-xs font-semibold uppercase tracking-wider text-on-surface-var">
+                Description <span class="text-error">*</span>
+            </label>
+            <textarea name="description" required rows="5"
+                      placeholder="Please provide as much detail as possible, including steps to reproduce the issue."
+                      class="mt-1.5 w-full px-3 py-2.5 border border-outline-var rounded text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"></textarea>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+            <a href="/" class="text-sm font-semibold uppercase tracking-wider text-on-surface-var hover:text-on-surface px-6 py-2.5 border border-outline-var rounded">
+                Cancel
+            </a>
+            <button type="submit"
+                    class="bg-primary hover:bg-primary-dark text-white text-sm font-semibold uppercase tracking-wider px-6 py-2.5 rounded flex items-center gap-2">
+                Submit Ticket
+                <span class="material-symbols-outlined text-base">send</span>
+            </button>
+        </div>
+    </form>
+
+    <p class="text-xs text-on-surface-var text-center mt-4 flex items-center justify-center gap-1">
+        <span class="material-symbols-outlined text-sm">lock</span>
+        All tickets are logged and audited for compliance.
+    </p>
+</div>
+
+<%- include('partials/footer') %>

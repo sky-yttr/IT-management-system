@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%= title %> · ITSM Pro</title>
+<link rel="stylesheet" href="/css/tailwind.css">
+<link rel="stylesheet" href="/css/icons.css">
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+
+<% if (currentUser) { %>
+<header class="bg-surface border-b border-outline-var">
+    <div class="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-10">
+            <a href="/" class="text-primary font-bold text-lg tracking-tight flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-2xl">shield</span>
+                ITSM Pro
+            </a>
+            <nav class="flex items-center gap-7 text-sm">
+                <a href="/" class="nav-link <%= (typeof nav !== 'undefined' && nav === 'dashboard') ? 'active' : 'text-on-surface hover:text-primary' %>">Dashboard</a>
+                <% if (currentUser.role === 'END_USER' || currentUser.role === 'IT_MANAGER') { %>
+                    <a href="/tickets/new" class="nav-link <%= (typeof nav !== 'undefined' && nav === 'new') ? 'active' : 'text-on-surface hover:text-primary' %>">New Ticket</a>
+                <% } %>
+                <% if (currentUser.role === 'IT_MANAGER') { %>
+                    <a href="/users" class="nav-link <%= (typeof nav !== 'undefined' && nav === 'users') ? 'active' : 'text-on-surface hover:text-primary' %>">Users</a>
+                    <a href="/reports" class="nav-link <%= (typeof nav !== 'undefined' && nav === 'reports') ? 'active' : 'text-on-surface hover:text-primary' %>">Reports</a>
+                <% } %>
+                <a href="/notifications" class="nav-link <%= (typeof nav !== 'undefined' && nav === 'notifications') ? 'active' : 'text-on-surface hover:text-primary' %> relative">
+                    Notifications
+                    <% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %>
+                        <span class="absolute -top-2 -right-5 bg-primary text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center"><%= unreadCount %></span>
+                    <% } %>
+                </a>
+            </nav>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="text-xs text-on-surface-var">
+                <%= currentUser.name %> · <span class="text-primary font-semibold"><%= currentUser.role.replace('_', ' ') %></span>
+            </span>
+            <form action="/logout" method="post">
+                <button type="submit" class="bg-primary hover:bg-primary-dark text-white text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded">Sign Out</button>
+            </form>
+        </div>
+    </div>
+</header>
+<% } %>
+
+<main class="max-w-[1400px] mx-auto px-6 py-8">

@@ -1,0 +1,138 @@
+<% nav = 'reports' %>
+<%- include('partials/header', { nav: 'reports' }) %>
+
+<%
+const maxCat = Math.max(1, ...byCategory.map(r => r.count));
+const maxPri = Math.max(1, ...byPriority.map(r => r.count));
+const maxDay = Math.max(1, ...overTime.map(r => r.count));
+function priColor(p) {
+    return ({ CRITICAL: 'bg-error', HIGH: 'bg-error/70', MEDIUM: 'bg-primary', LOW: 'bg-primary/50' })[p] || 'bg-primary';
+}
+%>
+
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-on-surface">Reports &amp; Analytics</h1>
+    <p class="text-sm text-on-surface-var mt-1">Operational overview of ticket volume, priority mix, and resolution performance.</p>
+</div>
+
+<!-- Status KPI row -->
+<div class="grid grid-cols-5 gap-4 mb-8">
+    <div class="bg-surface-card border border-outline-var rounded-lg p-5">
+        <div class="text-xs uppercase tracking-wider text-on-surface-var">Total</div>
+        <div class="text-3xl font-bold mt-1"><%= statusCounts.TOTAL %></div>
+    </div>
+    <div class="bg-surface-card border border-outline-var rounded-lg p-5">
+        <div class="text-xs uppercase tracking-wider text-on-surface-var">Open</div>
+        <div class="text-3xl font-bold mt-1 text-status-open-text"><%= statusCounts.OPEN %></div>
+    </div>
+    <div class="bg-surface-card border border-outline-var rounded-lg p-5">
+        <div class="text-xs uppercase tracking-wider text-on-surface-var">In Progress</div>
+        <div class="text-3xl font-bold mt-1 text-status-prog-text"><%= statusCounts.IN_PROGRESS %></div>
+    </div>
+    <div class="bg-surface-card border border-outline-var rounded-lg p-5">
+        <div class="text-xs uppercase tracking-wider text-on-surface-var">Pending</div>
+        <div class="text-3xl font-bold mt-1 text-status-pend-text"><%= statusCounts.PENDING_USER %></div>
+    </div>
+    <div class="bg-surface-card border border-outline-var rounded-lg p-5">
+        <div class="text-xs uppercase tracking-wider text-on-surface-var">Closed</div>
+        <div class="text-3xl font-bold mt-1 text-emerald-700"><%= statusCounts.CLOSED %></div>
+    </div>
+</div>
+
+<div class="grid grid-cols-2 gap-6 mb-6">
+    <!-- Volume by category -->
+    <div class="bg-surface-card border border-outline-var rounded-lg p-6">
+        <h2 class="text-lg font-semibold mb-4">Ticket Volume by Category</h2>
+        <% if (byCategory.length === 0) { %>
+            <p class="text-on-surface-var text-sm">No data.</p>
+        <% } else { %>
+            <div class="space-y-3">
+            <% byCategory.forEach(r => { %>
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span><%= r.category.charAt(0) + r.category.slice(1).toLowerCase() %></span>
+                        <span class="font-semibold"><%= r.count %></span>
+                    </div>
+                    <div class="h-2 bg-surface-low rounded-full overflow-hidden">
+                        <div class="h-full bg-primary rounded-full" style="width: <%= Math.round(r.count / maxCat * 100) %>%"></div>
+                    </div>
+                </div>
+            <% }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Volume by priority -->
+    <div class="bg-surface-card border border-outline-var rounded-lg p-6">
+        <h2 class="text-lg font-semibold mb-4">Tickets by Priority</h2>
+        <% if (byPriority.length === 0) { %>
+            <p class="text-on-surface-var text-sm">No data.</p>
+        <% } else { %>
+            <div class="space-y-3">
+            <% byPriority.forEach(r => { %>
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span><%= r.priority.charAt(0) + r.priority.slice(1).toLowerCase() %></span>
+                        <span class="font-semibold"><%= r.count %></span>
+                    </div>
+                    <div class="h-2 bg-surface-low rounded-full overflow-hidden">
+                        <div class="h-full <%= priColor(r.priority) %> rounded-full" style="width: <%= Math.round(r.count / maxPri * 100) %>%"></div>
+                    </div>
+                </div>
+            <% }) %>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Average resolution time per agent -->
+<div class="bg-surface-card border border-outline-var rounded-lg p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">Average Resolution Time per Agent</h2>
+        <% if (overallAvg !== null) { %>
+            <span class="text-sm text-on-surface-var">Overall average:
+                <span class="font-semibold text-on-surface"><%= overallAvg %> h</span></span>
+        <% } %>
+    </div>
+    <% if (perAgent.length === 0) { %>
+        <p class="text-on-surface-var text-sm">No tickets have been resolved yet.</p>
+    <% } else { %>
+        <table class="w-full text-sm">
+            <thead class="bg-surface-low">
+                <tr class="text-left text-[11px] font-semibold uppercase tracking-wider text-on-surface-var">
+                    <th class="px-4 py-2">Agent</th>
+                    <th class="px-4 py-2">Tickets Resolved</th>
+                    <th class="px-4 py-2">Avg. Resolution Time (hours)</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-var">
+            <% perAgent.forEach(r => { %>
+                <tr>
+                    <td class="px-4 py-3 font-medium"><%= r.agent_name %></td>
+                    <td class="px-4 py-3"><%= r.resolved_count %></td>
+                    <td class="px-4 py-3 font-mono"><%= r.avg_hours != null ? r.avg_hours : '—' %></td>
+                </tr>
+            <% }) %>
+            </tbody>
+        </table>
+    <% } %>
+</div>
+
+<!-- Volume over time -->
+<div class="bg-surface-card border border-outline-var rounded-lg p-6">
+    <h2 class="text-lg font-semibold mb-4">Ticket Volume Over Time</h2>
+    <% if (overTime.length === 0) { %>
+        <p class="text-on-surface-var text-sm">No data.</p>
+    <% } else { %>
+        <div class="flex items-end gap-2 h-40">
+        <% overTime.forEach(r => { %>
+            <div class="flex-1 flex flex-col items-center justify-end h-full" title="<%= r.day %>: <%= r.count %>">
+                <div class="w-full bg-primary rounded-t" style="height: <%= Math.round(r.count / maxDay * 100) %>%"></div>
+                <div class="text-[9px] text-on-surface-var mt-1 rotate-45 origin-left whitespace-nowrap"><%= r.day.slice(5) %></div>
+            </div>
+        <% }) %>
+        </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>

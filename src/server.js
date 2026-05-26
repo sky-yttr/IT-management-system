@@ -45,6 +45,11 @@ async function main() {
         res.status(404).render('error', { title: 'Not found', message: 'Page not found.' });
     });
 
+    app.use((err, req, res, next) => {
+        console.error(err);
+        res.status(500).render('error', { title: 'Server error', message: err.message || 'An unexpected error occurred.' });
+    });
+
     app.listen(PORT, () => {
         console.log(`Help Desk prototype running at http://localhost:${PORT}`);
     });

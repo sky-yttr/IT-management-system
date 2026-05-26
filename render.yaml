@@ -2,7 +2,7 @@ services:
   - type: web
     name: it-management-system
     env: node
-    buildCommand: npm install && npm run init-db
+    buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: NODE_ENV
